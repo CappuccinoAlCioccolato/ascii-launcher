@@ -135,7 +135,7 @@ def _cli_setup(subparser: argparse.ArgumentParser) -> None:
     g = subs.add_parser("gen", help="Generate a launchscreen from an image/GIF/folder")
     g.add_argument("source")
     g.add_argument("--width", type=int, default=0,
-                   help="Characters per row (default: fill the terminal, up to 252)")
+                   help="Characters per row (default: 252)")
     g.add_argument("--ramp", default="codepage437")
     g.add_argument("--color", action="store_true")
     g.add_argument("--mono-color", default="blue")
