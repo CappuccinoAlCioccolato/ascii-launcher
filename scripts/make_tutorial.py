@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 """
-make_tutorial.py — render the ascii-launchscreen tutorial video (<= 90 s).
+make_tutorial.py — ascii-launchscreen tutorial video (<= 90 s).
 
-Screencast-style: a simulated terminal showing the real plugin commands and
-their real ASCII output, step by step:
+Shows the real workflow at full reference resolution (252 columns, zoomed to
+view), no placeholder animation:
 
-  1. gen 08.jpg           -> still image becomes ASCII
-  2. tweak (shades+invert) -> matches the reference (white bg, block shades)
-  3. durations 3 s / 6 s
-  4. hermes starts        -> launchscreen plays in the same terminal, then prompt
+  1. png -> ascii          (the still image becomes ASCII art)
+  2. tweak tool            (--invert, --ramp shades change the result live)
+  3. durations             (still 3 s, animation 6 s)
+  4. hermes starts         (launchscreen plays automatically, same terminal)
+  5. how to reproduce      (exact commands)
 
-Uses only the plugin's own engine (real output) + Pillow + ffmpeg.
+Uses the plugin's own engine + Pillow + ffmpeg. Real output only.
 """
 from __future__ import annotations
 
@@ -32,10 +33,11 @@ FPS = 25
 SIZE = (1280, 720)
 BG = (13, 15, 22)
 TERM_BG = (9, 10, 16)
-PROMPT = (120, 200, 120)
 CMD = (220, 220, 230)
 
 SRC_08 = Path(r"C:\Users\gabri\Downloads\nous_frames_v2\nous_frames_v2\08.jpg")
+FRAMES_DIR = Path(r"C:\Users\gabri\Downloads\nous_frames_v2\nous_frames_v2")
+WIDTH = 252
 
 
 def _font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
@@ -59,7 +61,9 @@ def _hex_rgb(h: str) -> tuple[int, int, int]:
     return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
 
 
-def _ascii_image(spec: dict, idx: int, cell_w: int, cell_h: int, paper: bool = False) -> Image.Image:
+def render_ascii(spec: dict, idx: int, cell_w: int = 8, cell_h: int = 16,
+                 paper: bool = False) -> Image.Image:
+    """Render one frame at a large crisp cell size (the caller scales it down)."""
     fr = spec["frames"][idx]
     rows = fr["text"].split("\n")
     w, h = spec["width"], spec["height"]
@@ -79,32 +83,14 @@ def _ascii_image(spec: dict, idx: int, cell_w: int, cell_h: int, paper: bool = F
     return img
 
 
-def terminal(command: str, art: Image.Image | None, caption: str = "") -> Image.Image:
-    """A terminal window: title bar, prompt+command, then the ASCII art."""
-    img = Image.new("RGB", SIZE, TERM_BG)
-    d = ImageDraw.Draw(img)
-    # title bar
-    d.rectangle([0, 0, SIZE[0], 34], fill=(30, 32, 44))
-    d.ellipse([14, 12, 24, 22], fill=(255, 95, 86))
-    d.ellipse([34, 12, 44, 22], fill=(255, 189, 46))
-    d.ellipse([54, 12, 64, 22], fill=(39, 201, 63))
-    d.text((80, 8), "hermes — ascii-launchscreen", font=_font(15), fill=(200, 200, 210))
-    # prompt
-    d.text((28, 48), "hermes", font=_font(24), fill=(168, 85, 247))
-    d.text((28, 82), "$ " + command, font=_font(22), fill=CMD)
-    # art, scaled to fit below the command
-    if art is not None:
-        avail_w = SIZE[0] - 56
-        avail_h = SIZE[1] - 130 - (40 if caption else 0)
-        ratio = min(avail_w / art.width, avail_h / art.height, 1.0)
-        nw, nh = max(1, int(art.width * ratio)), max(1, int(art.height * ratio))
-        art = art.resize((nw, nh), Image.LANCZOS)
-        x = (SIZE[0] - nw) // 2
-        y = 120 + (avail_h - nh) // 2
-        img.paste(art, (x, y), art)
-    if caption:
-        d.text((28, SIZE[1] - 34), caption, font=_font(20), fill=(120, 200, 120))
-    return img
+def _fit(img: Image.Image, box_w: int, box_h: int) -> Image.Image:
+    ratio = min(box_w / img.width, box_h / img.height, 1.0)
+    nw, nh = max(1, int(img.width * ratio)), max(1, int(img.height * ratio))
+    return img.resize((nw, nh), Image.LANCZOS)
+
+
+def _caption(img: Image.Image, text: str) -> None:
+    ImageDraw.Draw(img).text((28, SIZE[1] - 34), text, font=_font(20), fill=(120, 200, 120))
 
 
 def title_card(lines: list[tuple[str, int, tuple]]) -> Image.Image:
@@ -120,6 +106,61 @@ def title_card(lines: list[tuple[str, int, tuple]]) -> Image.Image:
     return img
 
 
+def terminal(command: str, art: Image.Image | None, caption: str = "") -> Image.Image:
+    img = Image.new("RGB", SIZE, TERM_BG)
+    d = ImageDraw.Draw(img)
+    d.rectangle([0, 0, SIZE[0], 34], fill=(30, 32, 44))
+    d.ellipse([14, 12, 24, 22], fill=(255, 95, 86))
+    d.ellipse([34, 12, 44, 22], fill=(255, 189, 46))
+    d.ellipse([54, 12, 64, 22], fill=(39, 201, 63))
+    d.text((80, 8), "hermes — ascii-launchscreen", font=_font(15), fill=(200, 200, 210))
+    d.text((28, 48), "hermes", font=_font(24), fill=(168, 85, 247))
+    d.text((28, 82), "$ " + command, font=_font(22), fill=CMD)
+    if art is not None:
+        fitted = _fit(art, SIZE[0] - 56, SIZE[1] - 130 - (40 if caption else 0))
+        x = (SIZE[0] - fitted.width) // 2
+        y = 120 + ((SIZE[1] - 130 - (40 if caption else 0)) - fitted.height) // 2
+        img.paste(fitted, (x, y), fitted)
+    if caption:
+        _caption(img, caption)
+    return img
+
+
+def split(photo_path: Path, ascii_art: Image.Image, caption: str) -> Image.Image:
+    """Left: the source photo. Right: the ASCII art. png -> ascii."""
+    img = Image.new("RGB", SIZE, BG)
+    d = ImageDraw.Draw(img)
+    half = SIZE[0] // 2
+    photo = Image.open(photo_path).convert("RGB")
+    p = _fit(photo, half - 90, SIZE[1] - 150)
+    img.paste(p, ((half - 90 - p.width) // 2, (SIZE[1] - 150 - p.height) // 2 + 20))
+    d.text((half // 2, 30), "png", font=_font(30), fill=(230, 230, 230), anchor="mm")
+    a = _fit(ascii_art, half - 90, SIZE[1] - 150)
+    img.paste(a, (half + (half - 90 - a.width) // 2, (SIZE[1] - 150 - a.height) // 2 + 20), a)
+    d.text((half + half // 2, 30), "ascii", font=_font(30), fill=(230, 230, 230), anchor="mm")
+    d.text((half, SIZE[1] // 2), "->", font=_font(40), fill=(59, 130, 246), anchor="mm")
+    _caption(img, caption)
+    return img
+
+
+def commands_card() -> Image.Image:
+    cmds = [
+        "hermes ascii-launchscreen gen 08.jpg --width 252",
+        "hermes ascii-launchscreen gen 08.jpg --width 252 --invert 100",
+        "hermes ascii-launchscreen gen 08.jpg --width 252 --ramp shades --invert 100",
+        "hermes ascii-launchscreen gen frames/ --color --animation-duration 6000",
+        "hermes                 # launchscreen plays automatically",
+    ]
+    img = Image.new("RGB", SIZE, BG)
+    d = ImageDraw.Draw(img)
+    d.text((80, 60), "how to reproduce", font=_font(40), fill=(230, 230, 230))
+    y = 150
+    for c in cmds:
+        d.text((80, y), "$ " + c, font=_font(24), fill=(120, 200, 120))
+        y += 56
+    return img
+
+
 def _hold(img: Image.Image, seconds: float) -> list[Image.Image]:
     return [img] * int(seconds * FPS)
 
@@ -130,66 +171,71 @@ def main() -> int:
         print("ffmpeg not found", file=sys.stderr)
         return 1
     DEMO.mkdir(exist_ok=True)
-
-    if not SRC_08.exists():
-        print(f"source not found: {SRC_08}", file=sys.stderr)
+    if not SRC_08.exists() or not FRAMES_DIR.exists():
+        print(f"source missing: {SRC_08}", file=sys.stderr)
         return 1
 
-    # Real plugin output
-    before = build_launchscreen(SRC_08, width=120, color_mode="mono")
-    after = build_launchscreen(SRC_08, width=120, color_mode="mono",
-                               ramp="shades", filters={"invert": 100})
-    anim = build_launchscreen(DEMO / "bounce.gif", width=100, color_mode="color")
+    print("building specs...")
+    default_spec = build_launchscreen(SRC_08, width=WIDTH, color_mode="mono")
+    invert_spec = build_launchscreen(SRC_08, width=WIDTH, color_mode="mono",
+                                     filters={"invert": 100})
+    shades_spec = build_launchscreen(SRC_08, width=WIDTH, color_mode="mono",
+                                     ramp="shades", filters={"invert": 100})
+    anim_spec = build_launchscreen(FRAMES_DIR, width=WIDTH, color_mode="color")
 
-    before_art = _ascii_image(before, 0, 5, 10)
-    after_art = _ascii_image(after, 0, 5, 10, paper=True)
+    print("rendering ascii images (252 cols)...")
+    default_art = render_ascii(default_spec, 0)
+    invert_art = render_ascii(invert_spec, 0, paper=True)
+    shades_art = render_ascii(shades_spec, 0, paper=True)
+    anim_frames = [render_ascii(anim_spec, i) for i in range(len(anim_spec["frames"]))]
 
     frames: list[Image.Image] = []
 
-    # Title
+    # 1. title
     frames += _hold(title_card([
         ("ascii-launchscreen", 72, (230, 230, 230)),
         ("PNG -> ASCII launchscreen for Hermes", 34, (59, 130, 246)),
-        ("tutorial — plugin workflow", 30, (140, 140, 160)),
     ]), 3)
 
-    # Step 1
-    frames += _hold(terminal(
-        'ascii-launchscreen gen 08.jpg --width 120',
-        before_art, "1 · insert the still image -> ASCII"),
-        5)
+    # 2. png -> ascii
+    frames += _hold(split(SRC_08, shades_art, "1 · png -> ascii · 252 columns, zoomed to view"), 6)
 
-    # Step 2
-    frames += _hold(terminal(
-        'ascii-launchscreen gen 08.jpg --width 120 --ramp shades --invert 100',
-        after_art, "2 · tweak -> white background, block shades (matches the reference)"),
-        6)
+    # 3. tweak tool — three states, the result changes live
+    frames += _hold(terminal('ascii-launchscreen gen 08.jpg --width 252', default_art,
+                             '2 · tweak: default (dark background, solid blocks)'), 4)
+    frames += _hold(terminal('ascii-launchscreen gen 08.jpg --width 252 --invert 100', invert_art,
+                             '2 · tweak: + --invert 100 (white background)'), 4)
+    frames += _hold(terminal('ascii-launchscreen gen 08.jpg --width 252 --ramp shades --invert 100', shades_art,
+                             '2 · tweak: + --ramp shades (soft shades, no solid blocks)'), 4)
 
-    # Step 3
+    # 4. durations
     frames += _hold(title_card([
         ("3 · durations", 56, (230, 230, 230)),
         ("still image: 3 s", 34, (168, 85, 247)),
         ("animation: 6 s", 34, (168, 85, 247)),
     ]), 3)
 
-    # Step 4 — the launchscreen animation in a terminal, then the prompt
-    n_anim = len(anim["frames"])
+    # 5. launchscreen plays on start (animation, 6 s), then prompt
+    n = len(anim_frames)
     for k in range(int(6 * FPS)):
-        art = _ascii_image(anim, k % n_anim, 5, 10)
-        frames.append(terminal("hermes", art, "4 · launchscreen plays on start — same terminal"))
-    # prompt appears
+        frames.append(terminal("hermes", anim_frames[k % n],
+                               '4 · launchscreen plays on start — same terminal'))
     prompt_img = Image.new("RGB", SIZE, TERM_BG)
     pd = ImageDraw.Draw(prompt_img)
     pd.text((28, 48), "hermes", font=_font(24), fill=(168, 85, 247))
     pd.text((28, 90), "You >", font=_font(26), fill=(220, 220, 230))
     frames += _hold(prompt_img, 2)
 
-    # Outro
+    # 6. how to reproduce
+    frames += _hold(commands_card(), 6)
+
+    # 7. outro
     frames += _hold(title_card([
         ("github.com/CappuccinoAlCioccolato/ascii-launcher", 30, (230, 230, 230)),
         ("Pillow only — no API, no network", 26, (140, 140, 160)),
     ]), 2)
 
+    print(f"encoding {len(frames)} frames...")
     tmp = DEMO / "tutorial_tmp"
     tmp.mkdir(parents=True, exist_ok=True)
     for i, f in enumerate(frames):

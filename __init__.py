@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import argparse
 import logging
-import shutil
 import sys
 import time
 from pathlib import Path
@@ -77,12 +76,8 @@ def _play(spec: dict) -> None:
 
 
 def _default_width() -> int:
-    """Fill the terminal, capped at the asciiart.eu max (400) and a sane floor."""
-    try:
-        cols = shutil.get_terminal_size(fallback=(120, 40)).columns
-        return max(40, min(252, cols - 2))
-    except Exception:  # noqa: BLE001
-        return 120
+    """Full reference resolution — render at 252 columns, zoom the window to view."""
+    return 252
 
 
 def _cli_run(args: argparse.Namespace) -> int:

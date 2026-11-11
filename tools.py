@@ -31,7 +31,7 @@ def ascii_generate(args: dict, **kwargs) -> str:
 
         spec = engine.build_launchscreen(
             src,
-            width=int(cfg("width", 120)),
+            width=int(cfg("width", 252)),
             ramp=cfg("ramp", "codepage437"),
             color_mode=cfg("color_mode", "mono"),
             mono_color=cfg("mono_color", "blue"),

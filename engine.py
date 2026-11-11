@@ -262,7 +262,7 @@ def _target_height(img_w: int, img_h: int, width: int) -> int:
 def image_to_ascii(
     img,
     *,
-    width: int = 80,
+    width: int = 252,
     ramp: str = DEFAULT_RAMP,
     color_mode: str = "mono",
     space_density: int = 1,
@@ -362,7 +362,7 @@ def load_input_frames(source: Path, *, max_frames: int = 60) -> tuple[list, list
 def build_launchscreen(
     source: Path,
     *,
-    width: int = 80,
+    width: int = 252,
     ramp: str = DEFAULT_RAMP,
     color_mode: str = "mono",
     mono_color: str = DEFAULT_MONO_COLOR,

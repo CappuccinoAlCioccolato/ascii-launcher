@@ -41,7 +41,7 @@ from engine import (  # noqa: E402
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="PNG/GIF -> ASCII (asciiart.eu port)")
     ap.add_argument("input", help="Image file, animated GIF, or directory of frames")
-    ap.add_argument("--width", type=int, default=80, help="Characters per row (default 80)")
+    ap.add_argument("--width", type=int, default=252, help="Characters per row (default 252)")
     ap.add_argument("--ramp", default="codepage437", choices=list(CHARSETS),
                     help="Character set (default codepage437 = block shades)")
     ap.add_argument("--color", action="store_true", help="Keep original image colours")

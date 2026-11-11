@@ -91,8 +91,13 @@ function Launchscreen({ ctx }) {
   const frame = frames[idx] || { text: '' }
   const mono = spec.color_mode !== 'color' || !frame.fg
   const hex = spec.mono_color_hex || '#3b82f6'
-  const width = spec.width || 80
-  const fontSize = Math.max(0.5, Math.min(1.6, 92 / width))
+  const text = String(frame.text || '')
+  const lines = text.split('\n')
+  const cols = spec.width || Math.max.apply(null, lines.map((l) => l.length)) || 80
+  const rows = spec.height || lines.length || 40
+  // Zoom-to-fit: scale the font so the FULL art (all columns and rows) fits
+  // the window. Monospace char width ~0.6em; line height = 1em (lineHeight: 1).
+  const fontSize = 'min(' + (95 / (cols * 0.6)).toFixed(3) + 'vw, ' + (95 / rows).toFixed(3) + 'vh)'
 
   return jsx('div', {
     onClick: () => setDone(true),
@@ -112,18 +117,18 @@ function Launchscreen({ ctx }) {
           style: {
             color: hex,
             fontFamily: 'var(--font-mono, ui-monospace, monospace)',
-            fontSize: fontSize + 'vw',
+            fontSize: fontSize,
             lineHeight: 1,
             margin: 0,
             whiteSpace: 'pre',
             overflow: 'hidden'
           },
-          children: String(frame.text || '')
+          children: text
         })
       : jsx('pre', {
           style: {
             fontFamily: 'var(--font-mono, ui-monospace, monospace)',
-            fontSize: fontSize + 'vw',
+            fontSize: fontSize,
             lineHeight: 1,
             margin: 0,
             whiteSpace: 'pre',

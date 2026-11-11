@@ -18,7 +18,7 @@ ASCII_GENERATE = {
             },
             "width": {
                 "type": "integer",
-                "description": "Characters per row (default 120).",
+                "description": "Characters per row (default 252).",
             },
             "ramp": {
                 "type": "string",

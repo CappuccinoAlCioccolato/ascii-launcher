@@ -32,7 +32,7 @@ config_schema:
     description: "Path to a PNG/GIF (or folder of frame images) to convert."
   width:
     type: int
-    default: 120
+    default: 252
     label: "Width (chars)"
     description: "Characters per row."
   ramp:
