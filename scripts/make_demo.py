@@ -153,7 +153,7 @@ def main() -> int:
     seg_logo_mono = render_frame(logo_mono, 0)
     seg_logo_color = render_frame(logo_color, 0)
     seg_outro = title_card([
-        ("github: gabrieleorsaniti/ascii-launchscreen", 30, (230, 230, 230)),
+        ("github.com/CappuccinoAlCioccolato/ascii-launcher", 30, (230, 230, 230)),
         ("Pillow only — no API, no network", 26, (140, 140, 160)),
     ])
 

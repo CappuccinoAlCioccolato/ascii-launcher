@@ -7,7 +7,7 @@ description: >-
   colours, still images and animations). No API, no network — Pillow only.
 author: Gabriele Orsaniti
 license: MIT
-homepage: https://github.com/gabrieleorsaniti/ascii-launchscreen
+homepage: https://github.com/CappuccinoAlCioccolato/ascii-launcher
 tags: [launchscreen, ascii-art, terminal, desktop, intro, hackathon]
 
 manifest_version: 2
