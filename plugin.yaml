@@ -1,0 +1,82 @@
+name: ascii-launchscreen
+version: 1.0.0
+description: >-
+  Local PNG/GIF -> ASCII launchscreen for the Hermes CLI and desktop app.
+  Reverse-engineered port of the asciiart.eu image-to-ascii algorithm
+  (block-shade and classic ramps, CSS filter chain, monochrome or original
+  colours, still images and animations). No API, no network — Pillow only.
+author: Gabriele Orsaniti
+license: MIT
+homepage: https://github.com/gabrieleorsaniti/ascii-launchscreen
+tags: [launchscreen, ascii-art, terminal, desktop, intro, hackathon]
+
+manifest_version: 2
+api_version: 1
+requires_hermes: ">=0.21.0"
+
+provides_tools:
+  - ascii_generate
+  - ascii_play
+
+python_dependencies:
+  - "Pillow>=9.0,<14"
+
+config_schema:
+  source:
+    type: str
+    default: ""
+    label: "Source image"
+    description: "Path to a PNG/GIF (or folder of frame images) to convert."
+  width:
+    type: int
+    default: 80
+    label: "Width (chars)"
+    description: "Characters per row."
+  ramp:
+    type: str
+    default: codepage437
+    label: "Character set"
+    choices: [codepage437, minimalist, normal, normal2, alphabetic, alphanumeric, numerical, extended, math, arrow, grayscale]
+  color_mode:
+    type: str
+    default: mono
+    label: "Colour mode"
+    choices: [mono, color]
+    description: "Monochrome, or the original image colours."
+  mono_color:
+    type: str
+    default: blue
+    label: "Monochrome colour"
+    choices: [blue, red, green, yellow, magenta, cyan, white, black, gray]
+  still_duration_s:
+    type: float
+    default: 5
+    label: "Still duration (s)"
+    description: "How long a still image shows."
+  animation_duration_s:
+    type: float
+    default: 8
+    label: "Animation duration (s)"
+    description: "How long an animation plays."
+  frame_delay_ms:
+    type: int
+    default: 80
+    label: "Frame delay (ms)"
+    description: "Milliseconds each animation frame is shown."
+  space_density:
+    type: int
+    default: 1
+    label: "Space density"
+    description: "Extra trailing spaces appended to the ramp."
+  brightness:
+    type: int
+    default: 100
+    label: "Brightness (%)"
+  contrast:
+    type: int
+    default: 100
+    label: "Contrast (%)"
+  invert:
+    type: int
+    default: 0
+    label: "Invert (%)"
