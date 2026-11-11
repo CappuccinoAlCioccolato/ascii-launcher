@@ -18,6 +18,9 @@ provides_tools:
   - ascii_generate
   - ascii_play
 
+provides_hooks:
+  - on_session_start
+
 python_dependencies:
   - "Pillow>=9.0,<14"
 
@@ -29,14 +32,14 @@ config_schema:
     description: "Path to a PNG/GIF (or folder of frame images) to convert."
   width:
     type: int
-    default: 80
+    default: 120
     label: "Width (chars)"
     description: "Characters per row."
   ramp:
     type: str
     default: codepage437
     label: "Character set"
-    choices: [codepage437, minimalist, normal, normal2, alphabetic, alphanumeric, numerical, extended, math, arrow, grayscale]
+    choices: [codepage437, shades, minimalist, normal, normal2, alphabetic, alphanumeric, numerical, extended, math, arrow, grayscale]
   color_mode:
     type: str
     default: mono
@@ -50,12 +53,12 @@ config_schema:
     choices: [blue, red, green, yellow, magenta, cyan, white, black, gray]
   still_duration_s:
     type: float
-    default: 5
+    default: 3
     label: "Still duration (s)"
     description: "How long a still image shows."
   animation_duration_s:
     type: float
-    default: 8
+    default: 6
     label: "Animation duration (s)"
     description: "How long an animation plays."
   frame_delay_ms:

@@ -51,8 +51,8 @@ directory of images (sorted by filename, one frame each).
 
 ## Timing
 
-- Still image: shows for `still_duration_s` (default 5 s).
-- Animation: plays for `animation_duration_s` (default 8 s), one frame every
+- Still image: shows for `still_duration_s` (default 3 s).
+- Animation: plays for `animation_duration_s` (default 6 s), one frame every
   `frame_delay_ms` (default 80 ms).
 - All three are configurable in Settings → Plugins → ascii-launchscreen
   (desktop), in `plugin.yaml` `config_schema`, or per-generation via tool

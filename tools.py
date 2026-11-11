@@ -31,7 +31,7 @@ def ascii_generate(args: dict, **kwargs) -> str:
 
         spec = engine.build_launchscreen(
             src,
-            width=int(cfg("width", 80)),
+            width=int(cfg("width", 120)),
             ramp=cfg("ramp", "codepage437"),
             color_mode=cfg("color_mode", "mono"),
             mono_color=cfg("mono_color", "blue"),
@@ -40,8 +40,8 @@ def ascii_generate(args: dict, **kwargs) -> str:
                 "contrast": int(cfg("contrast", 100)),
                 "invert": int(cfg("invert", 0)),
             },
-            still_duration_ms=int(cfg("still_duration_ms", 5000)),
-            animation_duration_ms=int(cfg("animation_duration_ms", 8000)),
+            still_duration_ms=int(cfg("still_duration_ms", 3000)),
+            animation_duration_ms=int(cfg("animation_duration_ms", 6000)),
             frame_delay_ms=int(cfg("frame_delay_ms", 80)),
         )
         out = engine.save_spec(spec, _plugin_data_dir(), write_frames=True)

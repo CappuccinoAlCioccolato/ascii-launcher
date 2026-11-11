@@ -21,7 +21,7 @@ running entirely offline on Pillow. No API, no network, no telemetry.
 - **Filter chain** — brightness / contrast / saturation / sepia / hue-rotate /
   grayscale / invert, plus optional sharpen, Sobel edge detection, threshold,
   and four error-diffusion dithers (Floyd-Steinberg, JJN, Stucki, Atkinson).
-- **Tunable timing** — still image shows 5 s by default, animation plays 8 s,
+- **Tunable timing** — still image shows 3 s by default, animation plays 6 s,
   one frame every 80 ms. All three are live-tweakable in
   Settings → Plugins → ascii-launchscreen (desktop) or per-generation.
 

@@ -59,6 +59,7 @@ CHARSETS: dict[str, str] = {
     "arrow": "\u2191\u2197\u2192\u2198\u2193\u2199\u2190\u2196",
     "grayscale": "@$BWM#*oahkbdpwmZO0QCJYXzcvnxrjft/|()1{}[]-_+~<>i!lI;:,\"^`'. ",
     "codepage437": "\u2588\u2593\u2592\u2591",  # block shades (what the sample frames use)
+    "shades": "\u2593\u2592\u2591",  # 3 shades + space, no solid block (white-bg look)
 }
 DEFAULT_RAMP = "codepage437"
 
@@ -375,8 +376,8 @@ def build_launchscreen(
     threshold: Optional[int] = None,
     dither: Optional[str] = None,
     max_frames: int = 60,
-    still_duration_ms: int = 5000,
-    animation_duration_ms: int = 8000,
+    still_duration_ms: int = 3000,
+    animation_duration_ms: int = 6000,
     frame_delay_ms: int = 80,
 ) -> dict:
     """Build the serializable launchscreen spec from a still image, GIF, or frame dir."""

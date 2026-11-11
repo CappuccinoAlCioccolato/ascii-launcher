@@ -14,7 +14,7 @@ const FALLBACK = {
   kind: 'still',
   color_mode: 'mono',
   mono_color_hex: '#3b82f6',
-  duration_ms: 5000,
+  duration_ms: 3000,
   frame_delay_ms: 80,
   frames: [
     {
@@ -80,7 +80,7 @@ function Launchscreen({ ctx }) {
       const delay = spec.frame_delay_ms || 80
       stopAnim = ctx.setInterval(() => setIdx((i) => (i + 1) % frames.length), delay)
     }
-    const dur = spec.duration_ms || (spec.kind === 'still' ? 5000 : 8000)
+    const dur = spec.duration_ms || (spec.kind === 'still' ? 3000 : 6000)
     const stopTimer = ctx.setTimeout(() => setDone(true), dur)
     return () => { stopAnim(); stopTimer() }
   }, [spec, done])

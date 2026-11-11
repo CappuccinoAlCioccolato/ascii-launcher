@@ -18,12 +18,12 @@ ASCII_GENERATE = {
             },
             "width": {
                 "type": "integer",
-                "description": "Characters per row (default 80).",
+                "description": "Characters per row (default 120).",
             },
             "ramp": {
                 "type": "string",
                 "enum": [
-                    "codepage437", "minimalist", "normal", "normal2",
+                    "codepage437", "shades", "minimalist", "normal", "normal2",
                     "alphabetic", "alphanumeric", "numerical", "extended",
                     "math", "arrow", "grayscale",
                 ],
@@ -40,11 +40,11 @@ ASCII_GENERATE = {
             },
             "still_duration_ms": {
                 "type": "integer",
-                "description": "How long a still image shows, in ms (default 5000 = 5 s).",
+                "description": "How long a still image shows, in ms (default 3000 = 3 s).",
             },
             "animation_duration_ms": {
                 "type": "integer",
-                "description": "How long an animation plays, in ms (default 8000 = 8 s).",
+                "description": "How long an animation plays, in ms (default 6000 = 6 s).",
             },
             "frame_delay_ms": {
                 "type": "integer",
