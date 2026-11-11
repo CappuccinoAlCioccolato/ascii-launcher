@@ -26,12 +26,22 @@ _intro_shown = False
 
 
 def _on_session_start(session_id: str, model: str, platform: str, **kwargs) -> None:
-    """Play the launchscreen automatically in the same terminal on startup."""
+    """Play the launchscreen automatically in the same terminal on startup.
+
+    This only works when the agent runs in a process that owns a real terminal
+    (the in-process CLI/TUI). In a gateway setup the agent runs in the gateway
+    process — its stdout is not the user's terminal, so there is nowhere to
+    draw the intro, and sleeping here would just block the gateway. Guard on
+    ``stdout.isatty()`` so we play in a terminal and stay a no-op elsewhere.
+    Use ``cli_launcher.py`` for the gateway/local-chat case.
+    """
     global _intro_shown
     if _intro_shown:
         return
     if platform not in ("cli", "tui"):
-        return  # desktop has its own overlay; messaging/gateway has no terminal
+        return  # desktop has its own overlay; messaging has no terminal
+    if not sys.stdout.isatty():
+        return  # gateway/daemon process: no terminal to draw on
     _intro_shown = True
     try:
         spec = engine.load_spec(tools._plugin_data_dir() / "launchscreen.json")

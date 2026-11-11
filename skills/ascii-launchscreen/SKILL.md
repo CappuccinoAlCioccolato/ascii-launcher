@@ -46,7 +46,9 @@ directory of images (sorted by filename, one frame each).
 - `hermes ascii-launchscreen play` — preview the current launchscreen.
 - `hermes ascii-launchscreen launch` — play the intro, then return to the prompt.
 - `python cli_launcher.py` — standalone launcher (play + `hermes`, or
-  `--play-only` to preview).
+  `--play-only` to preview). Use this for the gateway/local-chat surface: the
+  `on_session_start` hook only draws in a process with a real terminal
+  (in-process CLI/TUI), and is a no-op behind a gateway.
 - In-session: `/ascii` describes it; `/ascii show 0` prints frame 0.
 
 ## Timing

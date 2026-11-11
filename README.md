@@ -70,6 +70,29 @@ python ascii_convert.py logo.png --color --width 100
 python cli_launcher.py --play-only
 ```
 
+## CLI intro (launchscreen before the prompt)
+
+The plugin registers an `on_session_start` hook that plays the launchscreen
+automatically — but it can only draw in a process that owns a real terminal,
+i.e. the in-process CLI/TUI. If your agent runs behind a **gateway** (the
+`local` chat surface, messaging platforms), the hook runs in the gateway
+process where stdout is not your terminal, so it deliberately stays a no-op
+instead of sleeping invisibly.
+
+For the gateway case, launch Hermes through the bundled wrapper, which plays
+the intro **in your terminal** and then execs `hermes`:
+
+```
+python cli_launcher.py                 # play intro, then run hermes
+python cli_launcher.py -c "..."        # extra args go to hermes
+python cli_launcher.py --play-only     # just preview, don't launch
+```
+
+It reads the launchscreen from the active profile's data dir; pass
+`--data-dir DIR` (or set `ASCII_LAUNCHSCREEN_DATA` / `HERMES_HOME`) if you run
+it outside the profile you generated in. To make it your default `hermes`,
+alias it in your shell (`alias hermes='python .../cli_launcher.py'`).
+
 ## How the algorithm works (reverse-engineered)
 
 From the minified source of asciiart.eu's image-to-ascii:
