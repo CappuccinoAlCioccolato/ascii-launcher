@@ -37,8 +37,14 @@ or, developing locally, link the checkout into your plugins dir:
 ln -s ~/src/ascii-launchscreen ~/.hermes/plugins/ascii-launchscreen
 ```
 
-The desktop half is enabled by default (shows the launchscreen on app start,
-falling back to an embedded HERMES banner until you generate custom art).
+(On Windows the plugins dir is `%LOCALAPPDATA%\hermes\plugins\` — or
+`%LOCALAPPDATA%\hermes\profiles\<name>\plugins\` under a named profile; copy or
+symlink the checkout there instead.)
+
+The desktop half ships **opt-in**: enable it in the desktop app under
+Capabilities → Plugins (the Python half's `plugins.enabled` gate applies too).
+Once on, it shows the launchscreen on app start, falling back to an embedded
+HERMES banner until you generate custom art.
 
 ## Quick start
 
@@ -53,7 +59,7 @@ hermes ascii-launchscreen gen frames/ --color
 # Preview it
 hermes ascii-launchscreen play
 
-# Play it, then start hermes (the CLI launchscreen)
+# Play the intro, then return to the prompt (inside hermes)
 hermes ascii-launchscreen launch
 ```
 

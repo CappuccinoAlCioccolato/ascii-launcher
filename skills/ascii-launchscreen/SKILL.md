@@ -44,7 +44,7 @@ directory of images (sorted by filename, one frame each).
 ## Playing and launching
 
 - `hermes ascii-launchscreen play` — preview the current launchscreen.
-- `hermes ascii-launchscreen launch` — play it, then start `hermes`.
+- `hermes ascii-launchscreen launch` — play the intro, then return to the prompt.
 - `python cli_launcher.py` — standalone launcher (play + `hermes`, or
   `--play-only` to preview).
 - In-session: `/ascii` describes it; `/ascii show 0` prints frame 0.
@@ -60,10 +60,10 @@ directory of images (sorted by filename, one frame each).
 
 ## Desktop
 
-The desktop app loads the overlay automatically (the desktop half is enabled
-by default). It shows the generated art for the configured duration, then
-dismisses; click it to skip. If no launchscreen has been generated yet it
-falls back to an embedded HERMES banner.
+The desktop app loads the overlay from the desktop half, which ships **opt-in**
+(enable it under Capabilities → Plugins). It shows the generated art for the
+configured duration, then dismisses; click it to skip. If no launchscreen has
+been generated yet it falls back to an embedded HERMES banner.
 
 ## Files
 

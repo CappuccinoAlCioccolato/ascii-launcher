@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import shutil
 import sys
 import time
 from pathlib import Path
@@ -48,7 +49,9 @@ def _play(spec: dict) -> None:
     mono_ansi = spec.get("mono_color_ansi", 34)
     duration_ms = int(spec.get("duration_ms", 6000))
     frame_delay_ms = int(spec.get("frame_delay_ms", 80))
-    ansi = [engine.frame_to_ansi(f, mono_ansi, color_mode) for f in frames]
+    cols, rows = _terminal_size()
+    ansi = [engine.frame_to_ansi(engine.fit_frame(f, cols, rows - 1), mono_ansi, color_mode)
+            for f in frames]
 
     def clear() -> None:
         # Pure-ANSI clear — no subprocess, works on any modern terminal.
@@ -73,6 +76,15 @@ def _play(spec: dict) -> None:
         pass
     finally:
         clear()
+
+
+def _terminal_size() -> tuple[int, int]:
+    """Current terminal columns/rows, with a sane fallback for non-TTY stdout."""
+    try:
+        size = shutil.get_terminal_size(fallback=(120, 40))
+        return max(1, size.columns), max(1, size.lines)
+    except Exception:  # noqa: BLE001
+        return 120, 40
 
 
 def _default_width() -> int:
@@ -116,6 +128,16 @@ def _cli_run(args: argparse.Namespace) -> int:
             return 1
         _play(spec)
         return 0
+    if sub == "launch":
+        # Play the intro, then return to the (already running) prompt. The
+        # standalone `python cli_launcher.py` is the drop-in wrapper that plays
+        # *and* starts `hermes`; inside hermes there is nothing left to launch.
+        spec = engine.load_spec(tools._plugin_data_dir() / "launchscreen.json")
+        if not spec:
+            print("No launchscreen generated yet. Run: hermes ascii-launchscreen gen <image>")
+            return 1
+        _play(spec)
+        return 0
     if sub == "status":
         spec = engine.load_spec(tools._plugin_data_dir() / "launchscreen.json")
         if not spec:
@@ -146,6 +168,7 @@ def _cli_setup(subparser: argparse.ArgumentParser) -> None:
     g.add_argument("--animation-duration", type=int, default=6000)
     g.add_argument("--frame-delay", type=int, default=80)
     subs.add_parser("play", help="Play the current launchscreen in the terminal")
+    subs.add_parser("launch", help="Play the intro, then return to the prompt (inside hermes)")
     subs.add_parser("status", help="Show the current launchscreen")
     subparser.set_defaults(func=_cli_run)
 
@@ -159,8 +182,12 @@ def _handle_ascii(raw_args: str) -> str:
         return "No launchscreen yet — run the ascii_generate tool or `hermes ascii-launchscreen gen <image>`."
     frames = spec.get("frames") or []
     if raw.startswith("show") or raw.isdigit():
-        idx = int(raw) if raw.isdigit() else int(raw.split()[-1] or 0)
-        idx = min(idx, len(frames) - 1)
+        # Accept `/ascii 3`, `/ascii show 3`, and `/ascii show` (defaults to 0).
+        num = raw if raw.isdigit() else "0"
+        parts = raw.split()
+        if len(parts) > 1 and parts[-1].isdigit():
+            num = parts[-1]
+        idx = min(int(num), len(frames) - 1)
         return engine.frame_to_ansi(frames[idx], spec.get("mono_color_ansi", 34), spec.get("color_mode", "mono"))
     return (
         f"Launchscreen: {spec['kind']}, {len(frames)} frame(s), {spec['width']}x{spec['height']}, "

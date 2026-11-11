@@ -3,7 +3,7 @@
 cli_launcher.py — play the ASCII launchscreen, then launch Hermes.
 
 This is the CLI launchscreen: a drop-in wrapper around `hermes`. It shows the
-generated ASCII art (still image for 5 s, animation for 8 s, both tweakable)
+generated ASCII art (still image for 3 s, animation for 6 s, both tweakable)
 and then execs hermes with whatever arguments you passed.
 
 Usage:
@@ -27,7 +27,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from engine import data_dir, frame_to_ansi, load_spec  # noqa: E402
+from engine import data_dir, fit_frame, frame_to_ansi, load_spec  # noqa: E402
 
 
 def clear() -> None:
@@ -36,22 +36,13 @@ def clear() -> None:
     sys.stdout.flush()
 
 
-def _fit(text: str, max_w: int, max_h: int) -> str:
-    lines = text.splitlines()
-    if not lines:
-        return text
-    lines = [ln[:max_w] for ln in lines]
-    lines = lines[:max_h]
-    return "\n".join(ln.rstrip() for ln in lines)
-
-
 def play(spec: dict, cols: int | None = None, rows: int | None = None) -> None:
     frames = spec.get("frames") or []
     if not frames:
         return
     color_mode = spec.get("color_mode", "mono")
     mono_ansi = spec.get("mono_color_ansi", 34)
-    duration_ms = int(spec.get("duration_ms", 8000))
+    duration_ms = int(spec.get("duration_ms", 6000))
     frame_delay_ms = int(spec.get("frame_delay_ms", 80))
 
     if cols is None or rows is None:
@@ -62,11 +53,16 @@ def play(spec: dict, cols: int | None = None, rows: int | None = None) -> None:
         cols = size.columns if size else 120
         rows = size.lines if size else 40
 
-    ansi_frames = [frame_to_ansi(f, mono_ansi, color_mode) for f in frames]
+    # Fit each frame to the terminal *before* colourising, so colour-mode
+    # frames are truncated cleanly on the grid instead of mid-ANSI-sequence.
+    ansi_frames = [
+        frame_to_ansi(fit_frame(f, cols, rows - 1), mono_ansi, color_mode)
+        for f in frames
+    ]
 
     def show(f: str) -> None:
         clear()
-        print(_fit(f, cols, rows - 1), flush=True)
+        print(f, flush=True)
 
     if len(frames) == 1:
         show(ansi_frames[0])

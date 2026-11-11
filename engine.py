@@ -429,6 +429,24 @@ def build_launchscreen(
 # --------------------------------------------------------------------------- #
 # Rendering helpers (shared by CLI launcher and plugin)
 # --------------------------------------------------------------------------- #
+def fit_frame(frame: dict, max_w: int, max_h: int) -> dict:
+    """Fit one serialized frame to a terminal box, preserving the colour grid.
+
+    Truncates rows to ``max_w`` columns and ``max_h`` rows on the plain text
+    (before colourising), and slices the parallel ``fg`` grid the same way, so
+    a 252-column launchscreen can be shown without wrapping on a narrow
+    terminal. Operates on the serialized form, so it works for both the CLI
+    hook and the standalone launcher.
+    """
+    rows = (frame.get("text") or "").split("\n")[:max_h]
+    rows = [r[:max_w] for r in rows]
+    out: dict = {"text": "\n".join(rows)}
+    fg = frame.get("fg")
+    if fg:
+        out["fg"] = [[cell for cell in row[:max_w]] for row in fg[:max_h]]
+    return out
+
+
 def frame_to_ansi(frame: dict, mono_ansi: int, color_mode: str) -> str:
     """Render one serialized frame as an ANSI string."""
     if color_mode == "color" and frame.get("fg"):
