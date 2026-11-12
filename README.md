@@ -84,14 +84,15 @@ the intro **in your terminal** and then execs `hermes`:
 
 ```
 python cli_launcher.py                 # play intro, then run hermes
+python cli_launcher.py -p project      # target a named profile
 python cli_launcher.py -c "..."        # extra args go to hermes
 python cli_launcher.py --play-only     # just preview, don't launch
 ```
 
-It reads the launchscreen from the active profile's data dir; pass
-`--data-dir DIR` (or set `ASCII_LAUNCHSCREEN_DATA` / `HERMES_HOME`) if you run
-it outside the profile you generated in. To make it your default `hermes`,
-alias it in your shell (`alias hermes='python .../cli_launcher.py'`).
+It resolves the Hermes home the same way `hermes` does (`%LOCALAPPDATA%\hermes`
+on Windows), and `-p NAME` / `HERMES_HOME` / `--data-dir DIR` select the
+profile or an explicit data directory. To make it your default `hermes`, alias
+it in your shell (`alias hermes='python .../cli_launcher.py'`).
 
 ## How the algorithm works (reverse-engineered)
 

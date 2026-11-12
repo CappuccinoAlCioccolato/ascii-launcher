@@ -8,13 +8,16 @@ and then execs hermes with whatever arguments you passed.
 
 Usage:
     python cli_launcher.py                 # play + run `hermes`
+    python cli_launcher.py -p project      # read the intro from a named profile
     python cli_launcher.py --no-intro      # skip straight to hermes
     python cli_launcher.py -c "..."        # extra args go to hermes
     python cli_launcher.py --play-only     # just preview, don't launch
 
 It reads launchscreen.json from the data dir (generate it with
-ascii_convert.py, or the plugin's /ascii or `hermes ascii-launchscreen gen`).
-If no spec exists yet it launches hermes directly without an intro.
+ascii_convert.py, or the plugin's /ascii or `hermes ascii-launchscreen gen`),
+resolving the Hermes home the same way `hermes` does — pass `-p NAME` (or set
+HERMES_HOME) to target a named profile. If no spec exists it launches hermes
+directly without an intro.
 """
 from __future__ import annotations
 
@@ -82,11 +85,15 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="ASCII launchscreen + hermes launcher")
     ap.add_argument("--no-intro", action="store_true", help="Skip the intro")
     ap.add_argument("--play-only", action="store_true", help="Play the intro and exit")
-    ap.add_argument("--data-dir", default=None)
+    ap.add_argument("-p", "--profile", default="", help="Hermes profile to read the intro from and launch")
+    ap.add_argument("--data-dir", default=None, help="Directory containing launchscreen.json")
     args, hermes_args = ap.parse_known_args(argv)
 
     if not args.no_intro:
-        spec = load_spec(Path(args.data_dir).expanduser() if args.data_dir else None)
+        if args.data_dir:
+            spec = load_spec(Path(args.data_dir).expanduser() / "launchscreen.json")
+        else:
+            spec = load_spec(data_dir(args.profile) / "launchscreen.json")
         if spec:
             try:
                 play(spec)
@@ -96,6 +103,8 @@ def main(argv=None) -> int:
     if args.play_only:
         return 0
 
+    if args.profile:
+        hermes_args = ["-p", args.profile, *hermes_args]
     cmd = ["hermes", *hermes_args]
     if sys.platform == "win32":
         return os.spawnv(os.P_WAIT, shutil.which("hermes") or "hermes", cmd)

@@ -40,6 +40,7 @@ from __future__ import annotations
 import json
 import math
 import os
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable, Optional
@@ -469,13 +470,37 @@ def spec_from_json(data: dict) -> dict:
     return data
 
 
-def data_dir() -> Path:
-    """Where launchscreen.json and generated frames live (profile-independent)."""
+def hermes_home(profile: str = "") -> Path:
+    """Resolve the Hermes home the way the ``hermes`` CLI does (no Hermes import).
+
+    Order: ``HERMES_HOME`` env → platform default (``%LOCALAPPDATA%\\hermes`` on
+    Windows, ``~/.hermes`` elsewhere). An optional ``profile`` names a child of
+    ``<root>/profiles/``. Standalone so ``ascii_convert.py`` / ``cli_launcher.py``
+    find the same data dir the plugin writes to, without depending on Hermes.
+    """
+    env = os.environ.get("HERMES_HOME", "").strip()
+    if env:
+        root = Path(env).expanduser()
+    elif sys.platform == "win32":
+        local = os.environ.get("LOCALAPPDATA", "").strip()
+        root = Path(local) / "hermes" if local else Path.home() / "AppData" / "Local" / "hermes"
+    else:
+        root = Path.home() / ".hermes"
+    if profile:
+        return root / "profiles" / profile
+    return root
+
+
+def data_dir(profile: str = "") -> Path:
+    """Where launchscreen.json and generated frames live.
+
+    Prefers ``ASCII_LAUNCHSCREEN_DATA`` (a full data-dir override), then the
+    Hermes home resolved like the CLI does (profile-aware on Windows).
+    """
     env = os.environ.get("ASCII_LAUNCHSCREEN_DATA")
     if env:
         return Path(env).expanduser()
-    home = os.environ.get("HERMES_HOME") or str(Path.home() / ".hermes")
-    return Path(home) / "plugin-data" / "ascii-launchscreen"
+    return hermes_home(profile) / "plugin-data" / "ascii-launchscreen"
 
 
 def load_spec(path: Optional[Path] = None) -> Optional[dict]:
